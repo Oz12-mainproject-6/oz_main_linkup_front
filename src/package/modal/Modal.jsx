@@ -7,7 +7,6 @@ const TempRoundBox = ({ children }) => {
                 padding: "12px",
                 borderRadius: "6px",
                 backgroundColor: "var(--color-bg)",
-                color: "white", //글자 색 흰색을 변경
 
                 minWidth: "500px",
                 maxWidth: "800px",
