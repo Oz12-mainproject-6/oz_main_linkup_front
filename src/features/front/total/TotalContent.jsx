@@ -10,12 +10,14 @@ import { axiosReturnsData } from "../../../shared/services/axiosInstance";
 import useLinkUpStore from "../../../shared/store/store";
 import { Vstack } from "../../../package/layout";
 import ArtistCalendar from "../../../shared/ArtistCalendar/ArtistCalendar";
+import useSubscriptions from "../../../shared/services/useSubscriptions";
 
 const TotalContent = () => {
     const artistArray = useLinkUpStore((state) => state.artistArray);
     const [page, setPage] = useState(1);
     const itemsPerPage = 5;
     const navigate = useNavigate();
+    useSubscriptions();
 
     const endpoint = "/api/events";
     const {
@@ -45,7 +47,6 @@ const TotalContent = () => {
                 <CustomImageIcon
                     key={artist.artist_id}
                     url={artist.artist_image_url}
-                    className={styles.circleIcon}
                     onClick={() => {
                         navigate(`/detail/artist/${artist.artist_id}`);
                     }}
