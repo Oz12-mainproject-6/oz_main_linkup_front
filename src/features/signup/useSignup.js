@@ -1,101 +1,67 @@
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import axiosInstance from "../../shared/services/axiosInstance";
+import { useMutation } from "@tanstack/react-query";
+import { axiosReturnsData } from "../../shared/services/axiosInstance";
+import { useNavigate } from "react-router";
+import useLinkUpStore from "../../shared/store/store";
+import { useEffect } from "react";
 
-const sendVerificationEmail = async (emailRef) => {
-    const email = emailRef.current.value;
-    const response = await axiosInstance.post(
-        "/api/auth/send-verification-email",
-        {
-            email,
+const useSignupMutate = () => {
+    const setModalKey = useLinkUpStore((state) => state.setModalKey);
+    const navigate = useNavigate();
+
+    const sendVerificationEmailMutation = useMutation({
+        mutationFn: (body) => axiosReturnsData("POST", "/api/auth/send-verification-email", body),
+    });
+
+    const signupMutation = useMutation({
+        mutationFn: (body) => axiosReturnsData("POST", "/api/auth/signup", body),
+        onSuccess: () => {
+            navigate("/login", { replace: true });
         },
-    );
-    const { message, email: verifiedEmail } = response.data;
-    console.log({ message });
-    return verifiedEmail;
-};
-
-const useRequestVerifyEmail = () => {
-    const [verifiedEmail, setVerifiedEmail] = useState(null);
-    const emailRef = useRef(null);
-
-    const {
-        data: verificationData,
-        error: verificationError,
-        refetch: refetchVerification,
-    } = useQuery({
-        queryKey: ["sendVerificationEmail"],
-        queryFn: () => sendVerificationEmail(emailRef),
-        refetchOnWindowFocus: false,
-        enabled: false,
     });
 
     useEffect(() => {
-        if (verificationError) {
-            console.error(verificationError);
-            setVerifiedEmail(null);
+        if (!sendVerificationEmailMutation.error && !signupMutation.error) {
             return;
         }
 
-        if (!verificationData) {
-            return;
-        }
+        setModalKey("error");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sendVerificationEmailMutation.error, signupMutation.error]);
 
-        setVerifiedEmail(verificationData);
-    }, [verificationData, verificationError]);
+    return {
+        sendVerificationEmailMutation,
+        signupMutation,
 
-    return { verifiedEmail, setVerifiedEmail, emailRef, refetchVerification };
+        isPendingVerification: sendVerificationEmailMutation.isPending,
+        errorVerification: sendVerificationEmailMutation.error,
+        isPendingSignup: signupMutation.isPending,
+        errorSignup: signupMutation.error,
+    };
 };
 
-const signup = async (body) => {
-    debugger;
-    const response = await axiosInstance.post("/api/auth/signup", body);
-    const { message, email } = response;
-    console.log({ message });
-    debugger;
-    return email;
-};
+const useSignupRedirect = () => {
+    const user = useLinkUpStore((state) => state.user);
 
-const useRequestSignup = (verifiedEmail) => {
-    const [body, setBody] = useState(null);
-    const {
-        data: signupData,
-        error: signupError,
-        refetch: refetchSignup,
-    } = useQuery({
-        queryKey: ["signup"],
-        queryFn: () => signup(body),
-        refetchOnWindowFocus: false,
-        enabled: false,
-    });
+    const navigate = useNavigate();
+
+    const isOkayToShow = !user;
 
     useEffect(() => {
-        refetchSignup();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [body]);
-
-    useEffect(() => {
-        if (signupError) {
-            console.error(signupError);
+        if (!user) {
             return;
         }
-
-        if (!verifiedEmail || !signupData) {
-            return;
-        }
-
-        // TODO: handle signup success
-        console.log({ signupData });
-        debugger;
+        navigate("/", { replace: true });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [signupData, signupError]);
+    }, [user]);
 
-    return { setBody, refetchSignup };
+    return { isOkayToShow };
 };
 
-export const useSignup = () => {
-    const veryfiyEmailReturn = useRequestVerifyEmail();
-    const signupReturn = useRequestSignup(veryfiyEmailReturn.verifiedEmail);
+const useSignup = () => {
+    const mutateReturns = useSignupMutate();
+    const redirectReturns = useSignupRedirect();
 
-    return { ...veryfiyEmailReturn, ...signupReturn };
+    return { ...mutateReturns, ...redirectReturns };
 };
+
+export default useSignup;

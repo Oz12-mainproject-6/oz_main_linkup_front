@@ -1,3 +1,18 @@
+.outerContainer {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.innerContainer {
+    width: var(--sizing-lg);
+}
+
 .grow {
     flex-grow: 1;
+}
+
+.certificateButton {
+    padding: var(--spacing-md);
 }

@@ -1,0 +1,20 @@
+.addCard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: var(--sizing-lg);
+}
+
+.plusIcon {
+    width: var(--sizing-xs);
+    color: var(--color-vivid);
+}
+
+.fanPostCardShell {
+    overflow: hidden;
+    border-radius: var(--rounded-md);
+}
+
+.fanPostCard {
+    filter: blur(var(--blur));
+}

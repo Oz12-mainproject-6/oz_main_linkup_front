@@ -1,113 +1,89 @@
-import useLinkUpStore from "../../../shared/store/dummyMijin.js";
+import styles from "./SearchContent.module.css";
+import { Vstack } from "../../../package/layout";
+import useLinkUpStore from "../../../shared/store/store";
+import useEventsForSearch from "./useEventsForSearch";
+import RoundBox from "../../../package/RoundBox";
+import GridContainer from "../../../package/gridContainer/GridContainer";
+import CustomImageCard from "../../../shared/CustomImageCard/CustomImageCard";
+import Skeleton from "../../../package/skeleton/Skeleton";
 import { useNavigate } from "react-router";
-import RoundBox from "../../../package/RoundBox.jsx";
-import FanPostCard from "../../../shared/FanpostCard.jsx";
+import FlexOneContainer from "../../../package/flexOneContainer/FlexOneContainer";
+import EventBox from "../../../package/eventBox/EventBox";
 
+const RoundBoxFull = ({ children }) => {
+    return (
+        <RoundBox padding="lg" isShadowed={false} className={styles.eventBoxEmpty}>
+            {children}
+        </RoundBox>
+    );
+};
+
+const EventColumnSkeleton = () => {
+    return (
+        <Vstack>
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+        </Vstack>
+    );
+};
+
+const EventColumn = ({ artistName, eventArray }) => {
+    return (
+        <Vstack className={styles.eventColumn}>
+            <p className={styles.artistName}>{artistName}</p>
+            <FlexOneContainer isYScrollable>
+                <Vstack>
+                    {eventArray.length === 0 && <RoundBoxFull>등록된 일정이 없어요</RoundBoxFull>}
+                    {eventArray.map((event) => (
+                        <EventBox key={event.id} event={event} />
+                    ))}
+                </Vstack>
+            </FlexOneContainer>
+        </Vstack>
+    );
+};
+
+const SearchResult = ({ artist, isPending, error }) => {
+    const navigate = useNavigate();
+
+    const imageUrl =
+        artist.banner_url || artist.torso_url || artist.face_url || artist.profile_image;
+    const eventDict = useLinkUpStore((state) => state.eventDict);
+    const eventArray = eventDict[artist.id] ?? [];
+
+    const artistName = artist.stage_name || artist.group_name || artist.name;
+
+    const handleClick = () => {
+        navigate(`/detail/artist/${artist.id}`);
+    };
+
+    return (
+        <GridContainer cols={2} onClick={handleClick}>
+            <CustomImageCard url={imageUrl} style={{ boxShadow: "var(--drop-shadow-md)" }} />
+            {isPending && eventArray.length === 0 && <EventColumnSkeleton />}
+            {!isPending && error && <RoundBoxFull>오류가 발생했어요</RoundBoxFull>}
+            {!isPending && <EventColumn artistName={artistName} eventArray={eventArray} />}
+        </GridContainer>
+    );
+};
 
 const SearchContent = () => {
-  const groupArray = useLinkUpStore((state) => state.groupArray);
-  const searchStatus = useLinkUpStore((state) => state.searchStatus);
-  const recommendedGroupArray = useLinkUpStore(
-    (state) => state.recommendedGroupArray
-  );
-  const navigate = useNavigate();
+    const { isPendingEvents, errorEvents } = useEventsForSearch();
+    const searchResultArray = useLinkUpStore((state) => state.searchResultArray);
 
-  // 검색 실패 화면
-  if (searchStatus === "fail") {
     return (
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        <h2>검색 결과</h2>
-        <p>일치하는 결과를 찾지 못했어요.</p>
-        <h3>찾으시는 그룹이 이 그룹이신가요?</h3>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          {recommendedGroupArray.slice(0, 2).map((group) => (
-            <RoundBox
-              key={group.id}
-              style={{ cursor: "pointer" }}
-              onClick={() => navigate(`/detail/${group.id}`)}
-            >
-              <img src={group.imgFace} alt={group.name} width={80} />
-              <div>{group.name}</div>
-            </RoundBox>
-          ))}
-        </div>
-      </div>
+        <Vstack gap="xl">
+            {searchResultArray.map((artist) => (
+                <SearchResult
+                    key={artist.id}
+                    artist={artist}
+                    isPending={isPendingEvents}
+                    error={errorEvents}
+                />
+            ))}
+        </Vstack>
     );
-  }
-
-  // 검색 성공 화면
-  return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-      <h2>검색 결과</h2>
-
-      {groupArray.map((group) => {
-        const combinedSchedules = [
-          ...group.groupScheduleArray.map((s) => ({
-            ...s,
-            owner: group.name, // 그룹
-          })),
-          ...group.memberArray.flatMap((member) =>
-            member.scheduleArray.map((ms) => ({
-              ...ms,
-              owner: member.name, // 멤버
-            }))
-          ),
-        ].sort((a, b) => new Date(a.sttime) - new Date(b.sttime));
-
-        const topSchedules = combinedSchedules.slice(0, 3);
-
-        return (
-          <div key={group.id} style={{ marginBottom: "2rem" }}>
-            {/* 그룹 + 멤버 */}
-            <div style={{ display: "flex", gap: "1rem", overflowX: "auto" }}>
-              <RoundBox
-                style={{ cursor: "pointer", flex: "0 0 auto" }}
-                onClick={() => navigate(`/detail/${group.id}`)}
-              >
-                <img src={group.imgFace} alt={group.name} width={80} />
-                <div>{group.name}</div>
-              </RoundBox>
-
-              {group.memberArray.map((member) => (
-                <RoundBox
-                  key={member.id}
-                  style={{ cursor: "pointer", flex: "0 0 auto" }}
-                  onClick={() => navigate(`/detail/${member.id}`)}
-                >
-                  <img src={member.imgFace} alt={member.name} width={80} />
-                  <div>{member.name}</div>
-                </RoundBox>
-              ))}
-            </div>
-
-            {/* 일정 (그룹+멤버 통합 최신 3개) */}
-            <h4>일정</h4>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-              }}
-            >
-              {topSchedules.map((s, i) => (
-                <RoundBox key={i}>
-                  {s.owner} {s.title} - {s.sttime}
-                </RoundBox>
-              ))}
-            </div>
-            {/* 그룹 팬포스트 */}
-            <h4>그룹 팬포스트</h4>
-            <FanPostCard
-              posts={group.groupPostArray}
-              limit={12}
-              cols={3}
-              onClickPost={(postId) => navigate(`/post/${postId}`)}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
 };
 
 export default SearchContent;

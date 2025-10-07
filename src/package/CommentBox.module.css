@@ -1,0 +1,8 @@
+.nickname {
+    font-weight: var(--font-weight-semibold);
+}
+
+.timeAgo {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+}

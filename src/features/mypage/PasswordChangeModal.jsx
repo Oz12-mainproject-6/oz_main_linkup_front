@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import Modal from "../../package/modal/Modal.jsx";
 import CustomButton from "../../package/customButton/CustomButton.jsx";
+import { apiChangePassword } from "../../shared/services/linkupApi.js";
 
-const PasswordChangeModal = ({ isOpen, onClose }) => {
-  const handleSubmit = (e) => {
+const PasswordChangeModal = ({ isOn, onClose }) => {
+  const [resultModal, setResultModal] = useState({
+    open: false,
+    message: "",
+    onConfirm: null,
+  });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const form = e.target;
@@ -11,111 +18,128 @@ const PasswordChangeModal = ({ isOpen, onClose }) => {
     const newPassword = form.newPassword.value;
     const confirmPassword = form.confirmPassword.value;
 
-    console.log({ currentPassword, newPassword, confirmPassword });
-
-    if (newPassword !== confirmPassword) {
-      alert("새 비밀번호와 확인이 일치하지 않습니다.");
-      return;
-    }
-     /* // ✅ 백엔드 API 호출
     try {
-      const response = await fetch("http://localhost:3000/api/user/change-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      // 비밀번호 변경 API 호출
+      await apiChangePassword(currentPassword, newPassword, confirmPassword);
+
+      // 성공 모달 열기
+      setResultModal({
+        open: true,
+        message: "비밀번호 변경이 완료되었습니다.",
+        onConfirm: () => {
+          setResultModal((prev) => ({ ...prev, open: false }));
+          onClose();
+          form.reset();
         },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-        }),
       });
+    } catch (error) {
+      console.error("비밀번호 변경 실패:", error);
 
-        if (!response.ok) {
-            throw new Error("비밀번호 변경 실패");
-        }
+      const detail = error.response?.data?.detail;
+      const errorMessage = Array.isArray(detail)
+        ? detail.map((d) => d.msg).join("\n")
+        : typeof detail === "string"
+        ? detail
+        : "비밀번호 변경 중 오류가 발생했습니다.";
 
-        const data = await response.json();
-        console.log("API 응답:", data);
-
-        alert("비밀번호 변경이 완료되었습니다.");
-        onClose();
-        form.reset();} 
-
-        catch (err) {
-            console.error(err);
-            alert("비밀번호 변경 중 오류가 발생했습니다.");
-            }
-      }; */
-
-    alert("비밀번호 변경이 완료되었습니다.");
-    onClose();
-    form.reset();
+      setResultModal({
+        open: true,
+        message: errorMessage,
+        onConfirm: () => {
+          setResultModal((prev) => ({ ...prev, open: false }));
+        },
+      });
+    }
   };
 
   return (
-    <Modal isOn={isOpen} onBackgroundClick={onClose}>
-      <h2>비밀번호 변경</h2>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          width: "100%",
-          marginTop: "10px",
-        }}
-      >
-        <input
-          type="password"
-          name="currentPassword"
-          placeholder="기존 비밀번호"
+    <>
+      {/* 비밀번호 변경 입력 모달 */}
+      <Modal isOn={isOn} onBackgroundClick={onClose}>
+        <h2>비밀번호 변경</h2>
+        <form
+          onSubmit={handleSubmit}
           style={{
-            padding: "8px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
             width: "100%",
+            marginTop: "10px",
           }}
-        />
-        <input
-          type="password"
-          name="newPassword"
-          placeholder="새 비밀번호"
-          style={{
-            padding: "8px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            width: "100%",
-          }}
-        />
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="새 비밀번호 확인"
-          style={{
-            padding: "8px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            width: "100%",
-          }}
-        />
+        >
+          <input
+            type="password"
+            name="currentPassword"
+            placeholder="기존 비밀번호"
+            style={{
+              padding: "8px",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+              width: "100%",
+            }}
+          />
+          <input
+            type="password"
+            name="newPassword"
+            placeholder="새 비밀번호"
+            style={{
+              padding: "8px",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+              width: "100%",
+            }}
+          />
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="새 비밀번호 확인"
+            style={{
+              padding: "8px",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+              width: "100%",
+            }}
+          />
 
-        {/* 버튼 영역 */}
-        <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
-          <CustomButton color="BLUE" shape="RECTANGLE" type="submit">
-            확인
-          </CustomButton>
+          <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
+            <CustomButton color="BLUE" shape="RECTANGLE" type="submit">
+              확인
+            </CustomButton>
+            <CustomButton
+              color="MONO"
+              shape="RECTANGLE"
+              type="button"
+              onClick={onClose}
+            >
+              취소
+            </CustomButton>
+          </div>
+        </form>
+      </Modal>
+
+      {/* 결과 모달 */}
+      <Modal
+        isOn={resultModal.open}
+        onBackgroundClick={resultModal.onConfirm}
+      >
+        <h2>{resultModal.message}</h2>
+        <div
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <CustomButton
             color="MONO"
             shape="RECTANGLE"
-            type="button"
-            onClick={onClose}
+            onClick={resultModal.onConfirm}
           >
-            취소
+            확인
           </CustomButton>
         </div>
-      </form>
-    </Modal>
+      </Modal>
+    </>
   );
 };
 

@@ -1,0 +1,141 @@
+.mypageWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  min-height: 100vh;
+}
+
+.searchTop {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-dim);
+}
+
+.searchBox {
+  width: 100%;
+  max-width: var(--sizing-lg);
+}
+
+.searchBox input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--rounded-md);
+  border: 1px solid var(--color-dim);
+  color: var(--color-vivid);
+  font-size: var(--text-sm);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.searchBox input::placeholder {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+/* NavBar 아래 사용자 프로필 */
+.profileFeed {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  margin-top: 70px; /* Layout.jsx navbar와 안 겹치게 하기 위한 마진 */
+}
+
+.profileBox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--rounded-md);
+  background-color: var(--color-dimdimdim);
+}
+
+.userProfile {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--color-dim);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-md);
+  color: var(--color-vivid);
+}
+
+.userStats {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* 본문 영역 */
+.mypageContainer {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.mypageContent {
+  flex: 1;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  min-width: 0;
+  color: var(--color-vivid);
+}
+
+/* -------------------------- */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.card {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--rounded-md);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background-color: var(--color-bg);
+}
+
+.card img {
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  border-radius: var(--rounded-md);
+}
+
+.card h3 {
+  margin: var(--spacing-sm) 0 0.25rem;
+  font-size: var(--text-md);
+}
+
+.card p {
+  font-size: var(--text-sm);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--drop-shadow-md);
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}

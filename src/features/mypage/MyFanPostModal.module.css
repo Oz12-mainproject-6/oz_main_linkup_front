@@ -1,0 +1,29 @@
+.container {
+    max-height: var(--container-md);
+    max-width: var(--container-lg);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.grid {
+    text-align: left;
+    height: 100%;
+}
+
+.column {
+    height: 100%;
+    overflow: hidden;
+}
+
+.image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: var(--rounded-md);
+}
+
+.bold {
+    font-weight: var(--font-weight-semibold);
+}

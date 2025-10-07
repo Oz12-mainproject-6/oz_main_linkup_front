@@ -1,37 +1,21 @@
 import RoundBox from "../RoundBox";
 import styles from "./Modal.module.css";
 
-const ModalContent = ({ children }) => {
+const ModalContent = ({ children, ...props }) => {
     const handleClick = (event) => {
         event.stopPropagation();
     };
     return (
-        <div
-            onClick={handleClick}
-            style={{
-                padding: "12px",
-                borderRadius: "6px",
-                backgroundColor: "var(--color-bg)",
-
-                minWidth: "500px",
-                maxWidth: "800px",
-                maxHeight: "800px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                boxShadow: "var(--drop-shadow-md)",
-            }}
-        >
+        <RoundBox padding="lg" {...props} onClick={handleClick}>
             {children}
-        </div>
+        </RoundBox>
     );
 };
 
-const ModalBackdrop = ({ onBackgroundClick, children }) => {
+const ModalBackdrop = ({ onBackgroundClick, children, ...props }) => {
     return (
         <div onClick={onBackgroundClick} className={styles.backdrop}>
-            <ModalContent>{children}</ModalContent>
+            <ModalContent {...props}>{children}</ModalContent>
         </div>
     );
 };

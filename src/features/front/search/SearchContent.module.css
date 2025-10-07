@@ -1,0 +1,17 @@
+.eventColumn {
+    height: var(--sizing-lg);
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.eventBoxEmpty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.artistName {
+    color: var(--color-muted);
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-semibold);
+}

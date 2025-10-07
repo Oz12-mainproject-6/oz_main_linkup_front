@@ -1,0 +1,22 @@
+.artistButton {
+    font-weight: var(--font-weight-semibold);
+    text-align: var(--text-align);
+    color: var(--color);
+    transition-property: color;
+    transition-duration: 0.1s;
+    transition-timing-function: cubic-bezier(0.01, 0.81, 0.09, 1.13);
+}
+
+.plusIcon {
+    color: var(--color-vivid);
+    height: var(--spacing-lg);
+}
+
+.sidebar {
+    text-align: start;
+    height: 100%;
+    min-width: 300px;
+    flex-shrink: 0;
+    padding: var(--spacing-md);
+    overflow: scroll;
+}

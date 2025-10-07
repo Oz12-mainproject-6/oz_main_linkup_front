@@ -1,18 +1,75 @@
 import axios from "axios";
-import useLinkUpStore from "../store/dummyMijin";
+import useLinkUpStore from "../store/store";
 
 const axiosInstance = axios.create({
-    baseURL: "http://3.39.239.114:8000/",
+    baseURL: import.meta.env.VITE_BASE_URL,
 });
 
 axiosInstance.interceptors.request.use((config) => {
-    const token = useLinkUpStore.getState().token;
-    if (!token) {
-        return;
+    const state = useLinkUpStore.getState();
+    const access_token = state.access_token;
+
+    if (!access_token) {
+        return config;
     }
 
-    config.headers.Autorization = token;
+    config.headers.Authorization = `Bearer ${access_token}`;
     return config;
 });
 
 export default axiosInstance;
+
+/**
+ * @param {"GET" | "POST" | "PUT" | "PATCH" | "DELETE"} method
+ * @param {any} body
+ */
+export const axiosReturnsData = async (method, url, body, access_token) => {
+    if (access_token) {
+        axiosInstance.headers = { Authorization: `Bearer ${access_token}` };
+    }
+
+    switch (method) {
+        case "GET": {
+            const response = await axiosInstance.get(url);
+            return response.data;
+        }
+        case "POST": {
+            const response = await axiosInstance.post(url, body);
+            return response.data;
+        }
+        case "PUT": {
+            const response = await axiosInstance.put(url, body);
+            return response.data;
+        }
+        case "PATCH": {
+            const response = await axiosInstance.patch(url, body);
+            return response.data;
+        }
+        case "DELETE": {
+            const response = await axiosInstance.delete(url);
+            return response.data;
+        }
+        default:
+            throw new Error("---- ERROR OCCURRED: 잘못된 메소드입니다");
+    }
+};
+
+export const axiosDownloadFile = async (url) => {
+    try {
+        const response = await axiosInstance.get(url, { responseType: "blob" });
+
+        const downloadUrl = window.URL.createObjectURL(response.data);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "";
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+        console.error(error);
+        debugger;
+    }
+};
