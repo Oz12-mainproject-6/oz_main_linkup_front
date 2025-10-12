@@ -16,11 +16,6 @@ const inputFieldInfoArray = [
     ["데뷔일", "debut_date", "date"],
     ["생일", "birth_date", "date"],
 ];
-const fileInputFieldInfoArray = [
-    ["얼굴 사진", "face_image", "file"],
-    ["상반신 사진", "torso_image", "file"],
-    ["배너 사진", "banner_image", "file"],
-];
 
 const makeDefaultValue = (selectedArtist, info) => {
     if (!selectedArtist) {
@@ -51,7 +46,6 @@ const AgencyArtistModal = () => {
     const modalKey = useLinkUpStore((state) => state.modalKey);
     const setModalKey = useLinkUpStore((state) => state.setModalKey);
 
-    // const { isPending, error, postMutation, putMutation, deleteMutation } = useAgentArtistModal();
     const { artistsPostMutation, artistsPutMutation, artistsDeleteMutation } = useCompanies();
 
     const dismiss = () => {
@@ -65,19 +59,17 @@ const AgencyArtistModal = () => {
 
         artistsDeleteMutation.mutate({ newOne: selectedArtist });
         dismiss();
-        // TODO: 삭제한 걸 로컬에도 반영해야 한다
     };
 
     const handleSubmit = (event) => {
         event.preventDefault();
 
         const formData = new FormData(event.target);
+        const artist_type = formData.get("group_name") ? "group" : "individual";
+        formData.append("artist_type", artist_type);
+
         const artist = convertFormDataToArtist(formData);
         const newOne = { id: Date.now(), ...artist };
-
-        // Override computed field
-        const artist_type = formData.get("group_name") ? "group" : "individual";
-        newOne.artist_type = artist_type;
 
         if (selectedArtist) {
             formData.append("id", selectedArtist.id);
@@ -86,7 +78,6 @@ const AgencyArtistModal = () => {
             artistsPostMutation.mutate({ body: formData, newOne });
         }
 
-        // TODO: POST or PUT 요청 보내고서 로컬에도 반영해야 함
         dismiss();
     };
 
@@ -99,15 +90,27 @@ const AgencyArtistModal = () => {
             onBackgroundClick={dismiss}
         >
             <form ref={formRef} onSubmit={handleSubmit}>
-                <GridContainer gap="MD" cols={4}>
+                <GridContainer gap="MD" cols={4} rows={1}>
                     <Vstack>
                         {inputFieldInfoArray.map((info) => (
                             <ArtistInput key={info} selectedArtist={selectedArtist} info={info} />
                         ))}
                     </Vstack>
-                    <ImageInput name="face_image" defaultSrc={selectedArtist?.face_url} />
-                    <ImageInput name="torso_image" defaultSrc={selectedArtist?.torso_url} />
-                    <ImageInput name="banner_image" defaultSrc={selectedArtist?.banner_url} />
+                    <ImageInput
+                        className={styles.imageInput}
+                        name="face_image"
+                        defaultSrc={selectedArtist?.face_url}
+                    />
+                    <ImageInput
+                        className={styles.imageInput}
+                        name="torso_image"
+                        defaultSrc={selectedArtist?.torso_url}
+                    />
+                    <ImageInput
+                        className={styles.imageInput}
+                        name="banner_image"
+                        defaultSrc={selectedArtist?.banner_url}
+                    />
 
                     <CustomButton type="submit">{buttonLabel}</CustomButton>
                     {selectedArtist && (
